@@ -1,50 +1,35 @@
-# React + TypeScript + Vite
+# Controle de parcelas - Administrados
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Status: Em Desenvolvimento**  
+Este projeto ainda está em desenvolvimento. Funcionalidades e design podem mudar.
 
-Currently, two official plugins are available:
+## Descrição
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Este é um aplicativo para gerenciar parcelas, onde os usuários podem visualizar, filtrar e acompanhar suas parcelas de pagamento. A aplicação foi desenvolvida com React e utiliza uma API para obter dados.
 
-## Expanding the ESLint configuration
+## Funcionalidades
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+- Visualização de parcelas pagas e pendentes.
+- Filtragem por status: Pagas, Pendentes, Atrasadas e Vencendo Hoje.
+- Exibição de detalhes da parcela, como valor e data de vencimento.
+- Interface responsiva e amigável.
 
-- Configure the top-level `parserOptions` property like this:
+## Tecnologias Utilizadas
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+- **Frontend**: React, TypeScript, Tailwind CSS
+- **Backend**: (Java SpringBoot)
+- **APIs**: API própria - Logo irei compartilhar também
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+## Como Começar
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+### Pré-requisitos
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+- [Node.js](https://nodejs.org/)
+- [npm](https://www.npmjs.com/)
+
+### Clonando o Repositório
+
+```bash
+git https://github.com/KarineJohanns/frontend-recibos-admin.git+
+
+cd recibos admin
