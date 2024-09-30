@@ -1,4 +1,4 @@
-# Controle de parcelas - Administrados
+# Controle de parcelas - Administrador
 
 **Status: Em Desenvolvimento**  
 Este projeto ainda está em desenvolvimento. Funcionalidades e design podem mudar.
