@@ -33,32 +33,40 @@ export interface ReportData {
 
 // Tipagens para Clientes, Produtos, Emitente e Parcelas (exemplo)
 export interface Cliente {
-  id: number;
-  nome: string;
-  cpf: string;
-  // Adicione outros campos conforme necessário
+  clienteId: number;         // Correspondente ao campo clienteId (Long)
+  clienteNome: string;       // Correspondente ao campo clienteNome (String)
+  clienteCpf: string;        // Correspondente ao campo clienteCpf (String)
+  clienteEndereco: string;   // Correspondente ao campo clienteEndereco (String)
+  clienteTelefone: string;   // Correspondente ao campo clienteTelefone (String)
+  senha: string;             // Correspondente ao campo senha (String)
+  primeiroAcesso: boolean;   // Correspondente ao campo primeiroAcesso (Boolean)
 }
 
 export interface Produto {
-  id: number;
-  nome: string;
-  preco: number;
-  // Adicione outros campos conforme necessário
+  produtoId: number;          // Correspondente ao campo produtoId (Long)
+  produtoNome: string;        // Correspondente ao campo produtoNome (String)
+  produtoValorTotal: number;  // Correspondente ao campo produtoValorTotal (Integer)
+  produtoDescricao: string;   // Correspondente ao campo produtoDescricao (String)
 }
 
 export interface Emitente {
-  id: number;
-  nome: string;
-  cnpj: string;
-  // Adicione outros campos conforme necessário
+  emitenteId: number;         // Correspondente ao campo emitenteId (Long)
+  emitenteNome: string;       // Correspondente ao campo emitenteNome (String)
+  emitenteCpf: string;        // Correspondente ao campo emitenteCpf (String)
+  emitenteEndereco: string;   // Correspondente ao campo emitenteEndereco (String)
+  emitenteTelefone: string;   // Correspondente ao campo emitenteTelefone (String)
 }
 
 export interface Parcela {
-  id: number;
-  valor: number;
-  dataVencimento: string;
-  clienteId: number;
-  // Adicione outros campos conforme necessário
+  clienteId: number;           // ID do cliente relacionado à parcela
+  produtoId: number;           // ID do produto relacionado à parcela
+  valorTotalProduto: number;   // Valor total do produto
+  numeroParcelas: number;      // Quantidade de parcelas
+  emitenteId: number;          // ID do emitente relacionado à parcela
+  intervalo: string;           // Intervalo (e.g., MENSAL, QUINZENAL, SEMANAL)
+  dataCriacao: string;         // Data de criação da parcela
+  dataVencimento: string;      // Data de vencimento da parcela
+  documento: string;           // Documento relacionado à parcela
 }
 
 // Funções de API
@@ -111,8 +119,8 @@ export const getClientes = async () => {
 };
 
 // Obtém a Cliente por nome
-export const getClientesPorNome = async () => {
-  const response = await api.get('/clientes/por-nome');
+export const getClientesPorNome = async (nome: string) => {
+  const response = await axios.get(`/clientes/por-nome?nome=${nome}`); // Chamada para o endpoint
   return response.data; // Retorna a lista de clientes
 };
 // Adiciona um novo Cliente
@@ -173,7 +181,7 @@ export const postEmitente = async (emitente: Emitente) => {
 
 // Atualiza um Emitente existente
 export const patchEmitente = async (id: number, emitente: Partial<Emitente>) => {
-  const response = await api.patch(`/Emitente/${id}`, emitente);
+  const response = await api.patch(`/emitente/${id}`, emitente);
   return response.data; // Retorna os dados do emitente atualizado
 };
 
@@ -189,6 +197,11 @@ export const getParcelas = async () => {
   const response = await api.get('/parcelas');
   return response.data; // Retorna a lista de parcelas
 };
+// Obtém uma parcela pelo ID
+export const getParcelaById = async (id: number) => {
+  const response = await api.get(`/parcelas/${id}`);
+  return response.data; // Retorna os dados da parcela encontrada
+};
 
 // Adiciona uma nova Parcela
 export const postParcela = async (parcela: Parcela) => {
@@ -197,10 +210,17 @@ export const postParcela = async (parcela: Parcela) => {
 };
 
 // Atualiza uma Parcela existente
-export const patchParcela = async (id: number, parcela: Partial<Parcela>) => {
-  const response = await api.patch(`/parcelas/${id}`, parcela);
-  return response.data; // Retorna os dados da parcela atualizada
+export const patchParcelas = async (parcelaId: string, dadosParcela: any) => {
+  const response = await api.patch(`/parcelas/${parcelaId}`, dadosParcela); // Não encapsule em um objeto 'body'
+  return response.data;
 };
+
+// Renegociar uma Parcela existente
+export const patchRenegociarParcelas = async (parcelaId: string, dadosParcela: any) => {
+  const response = await api.patch(`/parcelas/${parcelaId}/renegociar`, dadosParcela); // Não encapsule em um objeto 'body'
+  return response.data;
+};
+
 
 // Deleta uma Parcela existente
 export const deleteParcela = async (id: number) => {

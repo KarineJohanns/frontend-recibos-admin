@@ -20,7 +20,7 @@ const Login = () => {
       if (response.primeiroAcesso) {
         navigate('/alterar-senha'); // Redireciona para a tela de alteração de senha
       } else {
-        navigate('/'); // Redireciona para a página principal
+        navigate('/parcelas'); // Redireciona para a página principal
       }
 
       // Lógica para expiração do token (opcional)

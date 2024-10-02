@@ -1,12 +1,13 @@
 // src/pages/ParcelaDetails.tsx
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import api, { getParcelasData, deleteParcela } from "../api"; // Certifique-se de que deleteParcela está importado
-import MessageModal from "../components/MessageModal"; // Importando seu MessageModal
+import { useParams, useNavigate } from "react-router-dom"; // Importar useNavigate para navegação
+import { getParcelasData, deleteParcela } from "../api";
+import MessageModal from "../components/MessageModal";
 
 const ParcelaDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>(); // Obtém o id da URL
-  const [parcela, setParcela] = useState<any>(null); // Use 'any' ou crie um tipo específico se necessário
+  const navigate = useNavigate(); // Adicionar useNavigate para redirecionar
+  const [parcela, setParcela] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<boolean>(false);
@@ -16,8 +17,8 @@ const ParcelaDetails: React.FC = () => {
   useEffect(() => {
     const fetchParcela = async () => {
       try {
-        const response = await getParcelasData(); // Obtenha todas as parcelas
-        const parcela = response.find((p: any) => p.parcelaId === Number(id)); // Encontre a parcela pelo ID
+        const response = await getParcelasData();
+        const parcela = response.find((p: any) => p.parcelaId === Number(id));
         if (parcela) {
           setParcela(parcela);
         } else {
@@ -35,25 +36,34 @@ const ParcelaDetails: React.FC = () => {
 
   const handleDelete = async () => {
     try {
-              const response = await deleteParcela(parcela.parcelaId); // Chama a função de exclusão
-
-        // Verifica e exibe a mensagem retornada do backend
-        if (response.dtos && response.dtos.mensagem) {
-            setMessage(response.dtos.mensagem);
-        } else {
-            setMessage("Exclusão bem-sucedida, mas sem mensagem.");
-        }
+      const response = await deleteParcela(parcela.parcelaId);
+      if (response.dtos && response.dtos.mensagem) {
+        setMessage(response.dtos.mensagem);
+      } else {
+        setMessage("Exclusão bem-sucedida, mas sem mensagem.");
+      }
     } catch (err) {
-        console.error("Erro ao excluir a parcela:", err); // Log detalhado do erro
-        setMessage("Erro ao excluir a parcela: " + (err.response?.data?.message || err.message));
+      console.error("Erro ao excluir a parcela:", err);
+      setMessage(
+        "Erro ao excluir a parcela: " +
+          (err.response?.data?.message || err.message)
+      );
     } finally {
-        setMessageModalOpen(true); // Abre o modal de mensagem
-        setConfirmDelete(false); // Fecha a confirmação de exclusão
+      setMessageModalOpen(true);
+      setConfirmDelete(false);
     }
-};
+  };
 
   // Modal de Confirmação
-  const ConfirmationModal = ({ isOpen, onClose, onConfirm }: { isOpen: boolean; onClose: () => void; onConfirm: () => void }) => {
+  const ConfirmationModal = ({
+    isOpen,
+    onClose,
+    onConfirm,
+  }: {
+    isOpen: boolean;
+    onClose: () => void;
+    onConfirm: () => void;
+  }) => {
     if (!isOpen) return null;
 
     return (
@@ -62,10 +72,16 @@ const ParcelaDetails: React.FC = () => {
           <h2 className="text-lg font-bold mb-4">Confirmar Exclusão</h2>
           <p>Você tem certeza que deseja excluir esta parcela?</p>
           <div className="flex justify-end mt-4">
-            <button className="bg-gray-500 text-white py-2 px-4 rounded mr-2" onClick={onClose}>
+            <button
+              className="bg-gray-500 text-white py-2 px-4 rounded mr-2"
+              onClick={onClose}
+            >
               Cancelar
             </button>
-            <button className="bg-red-500 text-white py-2 px-4 rounded" onClick={onConfirm}>
+            <button
+              className="bg-red-500 text-white py-2 px-4 rounded"
+              onClick={onConfirm}
+            >
               Sim, excluir
             </button>
           </div>
@@ -189,13 +205,24 @@ const ParcelaDetails: React.FC = () => {
             <button className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600">
               Receber
             </button>
-            <button className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+            <button
+              className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+              onClick={() => navigate(`/editar-parcela/${parcela.parcelaId}`)} // Navegar para a tela de edição
+            >
               Editar
             </button>
-            <button className="bg-orange-500 text-white py-2 px-4 rounded hover:bg-orange-600">
+            <button
+              className="bg-orange-500 text-white py-2 px-4 rounded hover:bg-orange-600"
+              onClick={() =>
+                navigate(`/renegociar-parcela/${parcela.parcelaId}`)
+              }
+            >
               Renegociar
             </button>
-            <button className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600" onClick={() => setConfirmDelete(true)}>
+            <button
+              className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600"
+              onClick={() => setConfirmDelete(true)}
+            >
               Excluir
             </button>
           </>
@@ -215,7 +242,6 @@ const ParcelaDetails: React.FC = () => {
         message={message}
         onClose={() => {
           setMessageModalOpen(false);
-          // Você pode adicionar qualquer lógica após fechar o modal aqui, como redirecionar
         }}
       />
     </div>
