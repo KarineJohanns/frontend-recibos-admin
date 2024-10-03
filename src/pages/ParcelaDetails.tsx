@@ -1,7 +1,7 @@
 // src/pages/ParcelaDetails.tsx
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom"; // Importar useNavigate para navegação
-import { getParcelasData, deleteParcela } from "../api";
+import { getParcelasData, deleteParcela, patchEstornar } from "../api"; // Importar patchEstornar
 import MessageModal from "../components/MessageModal";
 import ModalReceberParcela from "../components/ModalReceberParcela"; // Importar o modal de recebimento
 
@@ -15,6 +15,7 @@ const ParcelaDetails: React.FC = () => {
   const [messageModalOpen, setMessageModalOpen] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
   const [receberModalOpen, setReceberModalOpen] = useState<boolean>(false); // Estado para abrir o modal de recebimento
+  const [estornoConfirmationOpen, setEstornoConfirmationOpen] = useState<boolean>(false); // Estado para abrir o modal de confirmação de estorno
 
   useEffect(() => {
     const fetchParcela = async () => {
@@ -56,6 +57,24 @@ const ParcelaDetails: React.FC = () => {
     }
   };
 
+  const handleEstornar = async () => {
+    console.log("Tentando estornar a parcela:", parcela.parcelaId); // Log da parcela
+    try {
+      const response = await patchEstornar(parcela.parcelaId);
+      console.log("Resposta do estorno:", response); // Log da resposta
+        setMessage(response.mensagem);
+    } catch (err) {
+      console.error("Erro ao estornar a parcela:", err);
+      setMessage(
+        "Erro ao estornar a parcela: " +
+          (err.response?.message || err.message)
+      );
+    } finally {
+      setMessageModalOpen(true);
+      setEstornoConfirmationOpen(false);
+    }
+  };
+
   // Modal de Confirmação
   const ConfirmationModal = ({
     isOpen,
@@ -91,6 +110,43 @@ const ParcelaDetails: React.FC = () => {
       </div>
     );
   };
+
+  // Modal de Confirmação para Estornar
+  const EstornoConfirmationModal = ({
+    isOpen,
+    onClose,
+    onConfirm,
+  }: {
+    isOpen: boolean;
+    onClose: () => void;
+    onConfirm: () => void;
+  }) => {
+    if (!isOpen) return null;
+  
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="bg-white p-6 rounded shadow-md">
+          <h2 className="text-lg font-bold mb-4">Confirmar Estorno</h2>
+          <p>Você tem certeza que deseja estornar esta parcela?</p>
+          <div className="flex justify-end mt-4">
+            <button
+              className="bg-gray-500 text-white py-2 px-4 rounded mr-2"
+              onClick={onClose}
+            >
+              Cancelar
+            </button>
+            <button
+              className="bg-red-500 text-white py-2 px-4 rounded"
+              onClick={onConfirm}
+            >
+              Sim, estornar
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+  
 
   if (loading) return <p>Carregando...</p>;
   if (error) return <p>{error}</p>;
@@ -197,7 +253,7 @@ const ParcelaDetails: React.FC = () => {
             <button className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600">
               Enviar Recibo
             </button>
-            <button className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">
+            <button className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600" onClick={() => setEstornoConfirmationOpen(true)}>
               Estornar
             </button>
           </>
@@ -223,19 +279,26 @@ const ParcelaDetails: React.FC = () => {
             </button>
             <button
               className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600"
-              onClick={() => setConfirmDelete(true)}
+              onClick={() => setEstornoConfirmationOpen(true)} // Abre o modal de confirmação para estornar
             >
-              Excluir
+              Estornar
             </button>
           </>
         )}
       </div>
 
-      {/* Modal de Confirmação */}
+      {/* Modal de Confirmação de Exclusão */}
       <ConfirmationModal
         isOpen={confirmDelete}
         onClose={() => setConfirmDelete(false)}
         onConfirm={handleDelete}
+      />
+
+      {/* Modal de Confirmação de Estorno */}
+      <EstornoConfirmationModal
+        isOpen={estornoConfirmationOpen}
+        onClose={() => setEstornoConfirmationOpen(false)}
+        onConfirm={handleEstornar}
       />
 
       {/* Modal de Mensagem */}
