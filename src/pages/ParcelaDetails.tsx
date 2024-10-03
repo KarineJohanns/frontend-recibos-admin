@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom"; // Importar useNavigate para navegação
 import { getParcelasData, deleteParcela } from "../api";
 import MessageModal from "../components/MessageModal";
+import ModalReceberParcela from "../components/ModalReceberParcela"; // Importar o modal de recebimento
 
 const ParcelaDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>(); // Obtém o id da URL
@@ -13,6 +14,7 @@ const ParcelaDetails: React.FC = () => {
   const [confirmDelete, setConfirmDelete] = useState<boolean>(false);
   const [messageModalOpen, setMessageModalOpen] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
+  const [receberModalOpen, setReceberModalOpen] = useState<boolean>(false); // Estado para abrir o modal de recebimento
 
   useEffect(() => {
     const fetchParcela = async () => {
@@ -113,7 +115,6 @@ const ParcelaDetails: React.FC = () => {
   return (
     <div className="p-4 max-w-3xl mx-auto">
       <div className="ml-12 md:ml-0">
-        {" "}
         <h1 className="text-2xl font-bold mb-4 text-right md:text-left">
           {parcela.documento}
         </h1>
@@ -202,7 +203,10 @@ const ParcelaDetails: React.FC = () => {
           </>
         ) : (
           <>
-            <button className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600">
+            <button
+              className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
+              onClick={() => setReceberModalOpen(true)} // Abre o modal de recebimento
+            >
               Receber
             </button>
             <button
@@ -213,9 +217,7 @@ const ParcelaDetails: React.FC = () => {
             </button>
             <button
               className="bg-orange-500 text-white py-2 px-4 rounded hover:bg-orange-600"
-              onClick={() =>
-                navigate(`/renegociar-parcela/${parcela.parcelaId}`)
-              }
+              onClick={() => setReceberModalOpen(true)} // Abre o modal de renegociação
             >
               Renegociar
             </button>
@@ -243,6 +245,13 @@ const ParcelaDetails: React.FC = () => {
         onClose={() => {
           setMessageModalOpen(false);
         }}
+      />
+
+      {/* Modal de Recebimento */}
+      <ModalReceberParcela
+        isOpen={receberModalOpen}
+        onClose={() => setReceberModalOpen(false)}
+        parcela={parcela} // Passa a parcela atual para o modal
       />
     </div>
   );

@@ -182,6 +182,7 @@ const Parcelas: React.FC = () => {
               >
                 <Link to={`/parcelas/${parcela.parcelaId}`} className="flex-1">
                   <h2 className="font-semibold">{parcela.documento}</h2>
+                  <p>{parcela.cliente.clienteNome}</p>
                   <p>
                     {parcela.paga
                       ? formatarValor(parcela.valorPago)

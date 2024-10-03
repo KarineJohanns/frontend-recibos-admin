@@ -2,7 +2,7 @@ import axios, { AxiosRequestConfig } from 'axios';
 
 // Configuração da instância do Axios
 const api = axios.create({
-  baseURL: 'http://localhost:8080/api', // Altere para a URL base da sua API
+  baseURL: 'http://localhost:8080/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -212,7 +212,23 @@ export const postParcela = async (parcela: Parcela) => {
 // Atualiza uma Parcela existente
 export const patchParcelas = async (parcelaId: string, dadosParcela: any) => {
   const response = await api.patch(`/parcelas/${parcelaId}`, dadosParcela); // Não encapsule em um objeto 'body'
+  console.log(response.data);
   return response.data;
+};
+ // Pagar parcela
+export const patchPagarParcelas = async (parcelaId: string, dadosParcela: any) => {
+  const response = await api.patch(`/parcelas/${parcelaId}/pagar`, dadosParcela); // Não encapsule em um objeto 'body'
+  console.log("mas que caralho " , response.data);
+  return response.data;
+  
+};
+
+//Escolha
+export const patchEscolha = async (parcelaId: string, dadosParcela: any) => {
+  const response = await api.patch(`/parcelas/${parcelaId}/escolha`, dadosParcela); // Não encapsule em um objeto 'body'
+  console.log("Retorno da requisição api.ts: " , response.data);
+  return response.data;
+  
 };
 
 // Renegociar uma Parcela existente
@@ -221,6 +237,11 @@ export const patchRenegociarParcelas = async (parcelaId: string, dadosParcela: a
   return response.data;
 };
 
+//Desfazer pagamento / estornar
+export const patchEstornar = async (parcelaId: string) => {
+  const response = await api.patch(`/parcelas/${parcelaId}/desfazer`); // Não encapsule em um objeto 'body'
+  return response.data;
+};
 
 // Deleta uma Parcela existente
 export const deleteParcela = async (id: number) => {
