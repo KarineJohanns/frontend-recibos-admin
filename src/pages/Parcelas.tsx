@@ -197,11 +197,7 @@ const Parcelas: React.FC = () => {
                   >
                     {badgeDetails.text}
                   </span>
-                  {parcela.paga && (
-                    <button className="bg-gray-500 text-white py-1 px-4 rounded mt-2 w-24">
-                      Recibo
-                    </button>
-                  )}
+                  
                 </div>
               </li>
             );

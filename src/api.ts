@@ -251,15 +251,17 @@ export const deleteParcela = async (id: number) => {
 
 // Recibos
 // Obtém a lista de Recibos
-export const getRecibos = async () => {
-  const response = await api.get('/recibos');
+export const postRecibos = async () => {
+  const response = await api.post('/recibos');
   return response.data; // Retorna a lista de recibos
 };
 
 // Adiciona um novo Recibo
-export const postRecibo = async (reciboData: any) => {
-  const response = await api.post('/recibos', reciboData);
-  return response.data; // Retorna os dados do recibo criado
+export const getRecibos = async (parcelaId: number) => {
+  const response = await api.get(`/recibos/${parcelaId}/pdf`, {
+    responseType: 'blob',
+  });
+  return response; // Retorna os dados do recibo criado
 };
 
 // Deleta um Recibo existente

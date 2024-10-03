@@ -1,7 +1,7 @@
 // src/pages/ParcelaDetails.tsx
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom"; // Importar useNavigate para navegação
-import { getParcelasData, deleteParcela, patchEstornar } from "../api"; // Importar patchEstornar
+import { getParcelasData, deleteParcela, patchEstornar, getRecibos } from "../api"; // Importar patchEstornar
 import MessageModal from "../components/MessageModal";
 import ModalReceberParcela from "../components/ModalReceberParcela"; // Importar o modal de recebimento
 
@@ -72,6 +72,30 @@ const ParcelaDetails: React.FC = () => {
     } finally {
       setMessageModalOpen(true);
       setEstornoConfirmationOpen(false);
+    }
+  };
+
+  const handleGerarRecibo = async (parcelaId: number) => {
+    try {
+      const response = await getRecibos(parcelaId);
+      console.log("Retorno recibo: ", response);
+  
+      // Cria o blob com o tipo correto
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      
+      // Cria o link para download
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `recibo_parcela_${parcelaId}.pdf`); // Nome do arquivo
+      document.body.appendChild(link);
+      link.click();
+      
+      // Remove o link após o clique e libera a URL do blob
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Erro ao gerar recibo', error);
     }
   };
 
@@ -247,7 +271,7 @@ const ParcelaDetails: React.FC = () => {
       <div className="flex justify-between mt-4">
         {parcela.paga ? (
           <>
-            <button className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+            <button className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600" onClick={() => handleGerarRecibo(parcela.parcelaId)}>
               Gerar Recibo
             </button>
             <button className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600">
