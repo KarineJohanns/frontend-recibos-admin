@@ -251,12 +251,6 @@ export const deleteParcela = async (id: number) => {
 
 // Recibos
 // Obtém a lista de Recibos
-export const postRecibos = async () => {
-  const response = await api.post('/recibos');
-  return response.data; // Retorna a lista de recibos
-};
-
-// Adiciona um novo Recibo
 export const getRecibos = async (parcelaId: number) => {
   const response = await api.get(`/recibos/${parcelaId}/pdf`, {
     responseType: 'blob',
@@ -264,10 +258,56 @@ export const getRecibos = async (parcelaId: number) => {
   return response; // Retorna os dados do recibo criado
 };
 
-// Deleta um Recibo existente
-export const deleteRecibo = async (id: number) => {
-  const response = await api.delete(`/recibos/${id}`);
-  return response.data; // Retorna os dados ou status da resposta (200 se sucesso)
+// Upload de Recibo assinado
+export const uploadFile = async (file: File, parcelaId: number) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('parcelaId', parcelaId.toString()); // Adiciona o ID da parcela
+
+  try {
+    const response = await api.post('/files/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data; // Aqui você receberá o link para download do arquivo
+  } catch (error) {
+    console.error('Erro no upload do arquivo:', error);
+    throw error; // Caso precise tratar o erro no componente
+  }
 };
+
+// Função para download de arquivo
+export const downloadFile = async (fileName: string) => {
+  try {
+    const response = await api.get(`/files/download/${fileName}`, {
+      responseType: 'blob', // Tipo blob para garantir o download
+    });
+
+    // Criar link de download e forçar o download do arquivo
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', fileName); // Define o nome do arquivo no download
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  } catch (error) {
+    console.error('Erro ao baixar o arquivo:', error);
+    throw error;
+  }
+};
+
+// Função para listar arquivos
+export const listFiles = async () => {
+  try {
+    const response = await api.get('files/list');
+    return response.data; // Retorna a lista de arquivos como array de strings
+  } catch (error) {
+    console.error('Erro ao listar arquivos:', error);
+    throw error;
+  }
+};
+
 
 export default api;

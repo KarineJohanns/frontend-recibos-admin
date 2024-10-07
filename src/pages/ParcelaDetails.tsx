@@ -1,9 +1,18 @@
 // src/pages/ParcelaDetails.tsx
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom"; // Importar useNavigate para navegação
-import { getParcelasData, deleteParcela, patchEstornar, getRecibos } from "../api"; // Importar patchEstornar
+import {
+  getParcelasData,
+  deleteParcela,
+  patchEstornar,
+  getRecibos,
+  uploadFile,
+} from "../api"; // Importar patchEstornar
 import MessageModal from "../components/MessageModal";
-import ModalReceberParcela from "../components/ModalReceberParcela"; // Importar o modal de recebimento
+import ModalReceberParcela from "../components/ModalReceberParcela";
+import Loading from "../components/Loading";
+import { formatarValor, formatarData } from "../utils";
+
 
 const ParcelaDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>(); // Obtém o id da URL
@@ -15,7 +24,9 @@ const ParcelaDetails: React.FC = () => {
   const [messageModalOpen, setMessageModalOpen] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
   const [receberModalOpen, setReceberModalOpen] = useState<boolean>(false); // Estado para abrir o modal de recebimento
-  const [estornoConfirmationOpen, setEstornoConfirmationOpen] = useState<boolean>(false); // Estado para abrir o modal de confirmação de estorno
+  const [estornoConfirmationOpen, setEstornoConfirmationOpen] =
+    useState<boolean>(false); // Estado para abrir o modal de confirmação de estorno
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   useEffect(() => {
     const fetchParcela = async () => {
@@ -62,12 +73,11 @@ const ParcelaDetails: React.FC = () => {
     try {
       const response = await patchEstornar(parcela.parcelaId);
       console.log("Resposta do estorno:", response); // Log da resposta
-        setMessage(response.mensagem);
+      setMessage(response.mensagem);
     } catch (err) {
       console.error("Erro ao estornar a parcela:", err);
       setMessage(
-        "Erro ao estornar a parcela: " +
-          (err.response?.message || err.message)
+        "Erro ao estornar a parcela: " + (err.response?.message || err.message)
       );
     } finally {
       setMessageModalOpen(true);
@@ -75,27 +85,83 @@ const ParcelaDetails: React.FC = () => {
     }
   };
 
+  const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
   const handleGerarRecibo = async (parcelaId: number) => {
     try {
       const response = await getRecibos(parcelaId);
-      console.log("Retorno recibo: ", response);
-  
-      // Cria o blob com o tipo correto
-      const blob = new Blob([response.data], { type: 'application/pdf' });
-      const url = window.URL.createObjectURL(blob);
-      
-      // Cria o link para download
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `recibo_parcela_${parcelaId}.pdf`); // Nome do arquivo
-      document.body.appendChild(link);
-      link.click();
-      
-      // Remove o link após o clique e libera a URL do blob
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Erro ao gerar recibo', error);
+       // Verifica se a resposta é um blob
+       if (response.data instanceof Blob) {
+        const blob = response.data; 
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+
+        // Aguarde até que o cabeçalho esteja disponível
+        let attempts = 0;
+        const maxAttempts = 20; // máximo de 20 tentativas (10 segundos)
+        const interval = setInterval(() => {
+            const contentDisposition = response.headers['content-disposition'];
+            if (contentDisposition) {
+                const filename = contentDisposition.split('filename=')[1].replace(/"/g, '').trim();
+                link.setAttribute("download", filename);
+                
+                // Para o intervalo e faz o download
+                clearInterval(interval);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+            } else if (attempts >= maxAttempts) {
+                clearInterval(interval);
+                console.error("O cabeçalho 'Content-Disposition' não foi encontrado após várias tentativas.");
+                link.setAttribute("download", `recibo_${parcelaId}.pdf`); // Fallback
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+            }
+            attempts++;
+        }, 500); // verifica a cada 500 ms (0,5 segundos)
+
+    } else {
+        console.error("A resposta não é um Blob.");
+    }
+} catch (error) {
+    console.error("Erro ao gerar recibo", error);
+}
+};
+
+  // Função para capturar o arquivo escolhido pelo usuário
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (event.target.files && event.target.files.length > 0) {
+      const file = event.target.files[0];
+      setSelectedFile(file); // Define o arquivo selecionado
+      setLoading(true); // Inicia o carregamento
+
+      try {
+        const parcelaId = parcela.parcelaId;
+
+        console.log("ID da parcela:", parcelaId);
+
+        // Envia o arquivo usando a função uploadFile
+        const uploadResponse = await uploadFile(file, parcelaId); // Passa o ID da parcela
+
+        // Exibe a mensagem de sucesso
+        console.log("Upload bem-sucedido:", uploadResponse);
+        setMessage("Recibo enviado com sucesso!");
+      } catch (error) {
+        console.error("Erro ao enviar recibo:", error);
+        setMessage(
+          "Erro ao enviar recibo: " +
+            (error.response?.data?.message || error.message)
+        );
+      } finally {
+        setLoading(false); // Termina o carregamento
+        setMessageModalOpen(true); // Exibe o modal com a mensagem
+      }
     }
   };
 
@@ -146,7 +212,7 @@ const ParcelaDetails: React.FC = () => {
     onConfirm: () => void;
   }) => {
     if (!isOpen) return null;
-  
+
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
         <div className="bg-white p-6 rounded shadow-md">
@@ -170,27 +236,15 @@ const ParcelaDetails: React.FC = () => {
       </div>
     );
   };
-  
 
-  if (loading) return <p>Carregando...</p>;
-  if (error) return <p>{error}</p>;
-  if (!parcela) return <p>Parcela não encontrada.</p>;
-
-  // Formatadores de data e valores
-  const formatarValor = (valor: number): string => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(valor / 100);
-  };
+  if (loading || error || !parcela) {
+    return <Loading loading={loading} error={error} notFound={!parcela} />;
+  }
 
   const getStatusText = (paga: boolean): string => {
     return paga ? "Paga" : "Pendente";
   };
 
-  const formatarData = (data: string): string => {
-    return new Intl.DateTimeFormat("pt-BR").format(new Date(data));
-  };
 
   return (
     <div className="p-4 max-w-3xl mx-auto">
@@ -271,13 +325,37 @@ const ParcelaDetails: React.FC = () => {
       <div className="flex justify-between mt-4">
         {parcela.paga ? (
           <>
-            <button className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600" onClick={() => handleGerarRecibo(parcela.parcelaId)}>
+            <button
+              className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+              onClick={() => handleGerarRecibo(parcela.parcelaId)}
+            >
               Gerar Recibo
             </button>
-            <button className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600">
-              Enviar Recibo
-            </button>
-            <button className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600" onClick={() => setEstornoConfirmationOpen(true)}>
+            <div>
+              <button
+                className={`bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 ${
+                  loading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                onClick={() =>
+                  !loading && document.getElementById("fileInput")?.click()
+                }
+                disabled={loading}
+              >
+                {loading ? "Enviando..." : "Enviar Recibo"}
+              </button>
+
+              <input
+                id="fileInput"
+                type="file"
+                accept="application/pdf"
+                style={{ display: "none" }}
+                onChange={handleFileChange} // Chama a função de upload ao selecionar o arquivo
+              />
+            </div>
+            <button
+              className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600"
+              onClick={() => setEstornoConfirmationOpen(true)}
+            >
               Estornar
             </button>
           </>
@@ -303,9 +381,9 @@ const ParcelaDetails: React.FC = () => {
             </button>
             <button
               className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600"
-              onClick={() => setEstornoConfirmationOpen(true)} // Abre o modal de confirmação para estornar
+              onClick={() => setConfirmDelete (true)} // Abre o modal de confirmação para estornar
             >
-              Estornar
+              Excluir
             </button>
           </>
         )}

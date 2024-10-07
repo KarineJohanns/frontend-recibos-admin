@@ -3,16 +3,18 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface MessageModalProps {
-  isOpen: boolean;
-  message: string;
-  onClose: () => void;
+  isOpen: boolean; // Indica se o modal está aberto
+  message: string; // Mensagem a ser exibida no modal
+  onClose: () => void; // Função para fechar o modal
 }
 
 const MessageModal: React.FC<MessageModalProps> = ({ isOpen, message, onClose }) => {
-  const navigate = useNavigate(); // Hook para navegação
+  const navigate = useNavigate(); // Hook para navegação entre páginas
 
+  // Se o modal não estiver aberto, retorna null para não renderizar nada
   if (!isOpen) return null;
 
+  // Função para fechar o modal e redirecionar para a página de parcelas
   const handleClose = () => {
     onClose();  // Chama a função de fechamento fornecida por props
     navigate('/parcelas');  // Redireciona para a página de listagem de parcelas

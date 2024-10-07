@@ -1,6 +1,7 @@
 // src/pages/Relatorios.tsx
 import React, { useEffect, useState } from "react";
 import { postRelatoriosData, getRelatoriosLista } from "../api";
+import Loading from "../components/Loading";
 
 interface Relatorio {
   nome: string;
@@ -17,6 +18,7 @@ const Relatorios: React.FC = () => {
   const [dataInicio, setDataInicio] = useState("");
   const [dataFim, setDataFim] = useState("");
   const [statusParcela, setStatusParcela] = useState<boolean | null>(null);
+  const [loadingReport, setLoadingReport] = useState<boolean>(false);
 
   const setDefaultDates = () => {
     const today = new Date();
@@ -64,6 +66,8 @@ const Relatorios: React.FC = () => {
   const handleGenerateReport = async () => {
     if (!selectedReport) return;
 
+    setLoadingReport(true);
+
     const reportData: any = {
       tipoRelatorio: selectedReport.nome,
       clienteId: 1,
@@ -101,15 +105,15 @@ const Relatorios: React.FC = () => {
     } catch (error) {
       console.error("Erro ao gerar relatório:", error);
     } finally {
+      setLoadingReport(false);
       handleCloseModal();
     }
   };
 
-  if (loading) return <p className="text-lg">Carregando...</p>;
-  if (error) return <p className="text-red-500">{error}</p>;
-
   return (
     <div>
+      {/* Componente de loading */}
+      <Loading loading={loading} error={error} />
       {/* Cabeçalho fixo */}
       <div
         className="sticky top-0 bg-white text-right md:text-left" // Adicionando text-right para telas menores e md:text-left para telas maiores
@@ -226,6 +230,7 @@ const Relatorios: React.FC = () => {
               <button
                 className="bg-blue-500 text-white rounded px-4 py-2"
                 onClick={handleGenerateReport}
+                disabled={loadingReport}
               >
                 Gerar Relatório
               </button>

@@ -2,11 +2,11 @@ import React from 'react';
 import { patchEstornar } from '../api'; // Importar a função patchEstornar
 
 interface ModalEscolhaProps {
-  isOpen: boolean;
-  onClose: () => void;
-  mensagem: string;
-  onAplicarDesconto: () => void;
-  parcelaId: string; // Adicionar parcelaId como prop
+  isOpen: boolean; // Indica se o modal está aberto
+  onClose: () => void; // Função para fechar o modal
+  mensagem: string; // Mensagem a ser exibida no modal
+  onAplicarDesconto: () => void; // Função para aplicar desconto
+  parcelaId: string; // ID da parcela a ser estornada
   onGerarNovasParcelas: () => void; // Função para abrir o modal de novas parcelas
 }
 
@@ -16,17 +16,18 @@ const ModalEscolha: React.FC<ModalEscolhaProps> = ({
   mensagem,
   onAplicarDesconto,
   parcelaId,
-  onGerarNovasParcelas, // Receber função para abrir novo modal
+  onGerarNovasParcelas, // Função para abrir novo modal de gerar parcelas
 }) => {
+  // Retorna null se o modal não estiver aberto
   if (!isOpen) return null;
 
+  // Função para estornar a parcela
   const handleCloseWithEstorno = async () => {
     try {
-      console.log("Chamando patchEstornar com parcelaId:", parcelaId);
-      await patchEstornar(parcelaId);
-      onClose();
+      await patchEstornar(parcelaId); // Chama a API para estornar a parcela
+      onClose(); // Fecha o modal após estornar
     } catch (error) {
-      console.error("Erro ao estornar a parcela:", error);
+      console.error("Erro ao estornar a parcela:", error); // Log de erro em caso de falha
     }
   };
 
@@ -34,7 +35,7 @@ const ModalEscolha: React.FC<ModalEscolhaProps> = ({
     <>
       <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
         <div className="relative bg-white rounded-lg shadow">
-          {/* Botão de fechar 'X' */}
+          {/* Botão de fechar o modal */}
           <button 
             type="button" 
             className="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center" 
@@ -54,7 +55,7 @@ const ModalEscolha: React.FC<ModalEscolhaProps> = ({
             <div className="flex justify-end mt-4">
               <button
                 className="bg-blue-500 text-white py-2 px-4 rounded mr-2 hover:bg-blue-600 focus:ring-4 focus:ring-blue-300"
-                onClick={onAplicarDesconto}
+                onClick={onAplicarDesconto} // Chama a função para aplicar desconto
               >
                 Aplicar Desconto
               </button>

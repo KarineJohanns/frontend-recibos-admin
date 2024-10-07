@@ -4,6 +4,7 @@ import { getParcelasData } from "../api";
 import positivo from "../assets/positivo.gif";
 import carregando from "../assets/carregando.gif";
 import { formatarValor, formatarData } from "../utils"; // Importando as funções de formatação
+import Loading from "../components/Loading";
 
 interface Cliente {
   clienteId: number;
@@ -48,9 +49,12 @@ const Parcelas: React.FC = () => {
         if (Array.isArray(response)) {
           setParcelas(response);
         } else {
-          console.error("Resposta do servidor não é um array:", response);
+          console.error("Resposta do servidor não é um array:");
           setParcelas([]); // Define um array vazio em caso de erro
         }
+      } catch (err) {
+        console.error("Erro ao buscar parcelas:", err);
+        setError("Erro ao buscar parcelas");
       } finally {
         setLoading(false);
       }
@@ -64,9 +68,7 @@ const Parcelas: React.FC = () => {
   dataAtual.setHours(0, 0, 0, 0); // Zera horas, minutos e segundos
 
   // Lógica para definir a cor e o texto do badge
-  const getBadgeDetails = (
-    parcela: Parcela
-  ): { color: string; text: string } => {
+  const getBadgeDetails = (parcela: Parcela): { color: string; text: string } => {
     const dataVencimento = new Date(parcela.dataVencimento);
     dataVencimento.setHours(0, 0, 0, 0); // Zera horas da data de vencimento para comparação
 
@@ -113,20 +115,11 @@ const Parcelas: React.FC = () => {
         new Date(b.dataVencimento).getTime()
     );
 
-  if (loading)
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <img
-          src={carregando}
-          alt="Sem dados"
-          className="max-w-full max-h-64 w-auto h-auto"
-        />
-      </div>
-    );
-  if (error) return <p>{error}</p>;
-
   return (
     <div>
+      {/* Componente de loading */}
+      <Loading loading={loading} error={error} />
+
       {/* Cabeçalho fixo */}
       <div className="sticky top-0 bg-white p-4" style={{ marginTop: 0 }}>
         <div className="flex flex-col md:flex-row md:items-start md:justify-start">
@@ -162,7 +155,8 @@ const Parcelas: React.FC = () => {
         </div>
       </div>
 
-      {filteredParcelas.length === 0 ? (
+      {/* Verifica se não há parcelas após o carregamento */}
+      {filteredParcelas.length === 0 && !loading ? (
         <div className="flex flex-col items-center justify-center p-4">
           <img
             src={positivo}
@@ -197,7 +191,6 @@ const Parcelas: React.FC = () => {
                   >
                     {badgeDetails.text}
                   </span>
-                  
                 </div>
               </li>
             );
