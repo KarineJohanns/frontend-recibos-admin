@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   getClientes,
   getProdutos,
@@ -26,7 +25,6 @@ const CriarParcela: React.FC = () => {
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
   const [isModalOpen, setIsModalOpen] = useState(false); // Estado do modal
   const [modalMessage, setModalMessage] = useState(""); // Mensagem do modal
-  const navigate = useNavigate();
 
   useEffect(() => {
     const today = new Date();

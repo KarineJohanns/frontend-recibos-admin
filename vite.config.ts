@@ -7,6 +7,7 @@ export default defineConfig({
     postcss: './postcss.config.js',
   },
   server: {
-    port: 5173, // Defina a porta desejada aqui
+    port: 3000, // Defina a porta desejada aqui
+    host: true,
   },
 });
