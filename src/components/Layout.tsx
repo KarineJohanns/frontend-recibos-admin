@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
+// Importe a versão diretamente do package.json ou use a variável de ambiente
+const appVersion = process.env.REACT_APP_VERSION;
+
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false); // Estado para controlar a abertura do menu
   const location = useLocation(); // Obtém a localização atual da aplicação
@@ -41,9 +44,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             isMenuOpen ? 'translate-x-0 w-[70%]' : '-translate-x-full'
           } md:translate-x-0 md:flex md:flex-col md:w-[30%]`} // Define o estilo do menu com transição
         >
-          <nav className="h-screen overflow-auto">
+          <nav className="h-screen overflow-auto flex flex-col">
             <Link
-              to="/parcelas"
+              to="/"
               className={`block py-6 px-4 text-xl ${location.pathname === '/parcelas' ? 'bg-gray-700' : ''}`} // Estilo para o link ativo
               onClick={handleLinkClick}
             >
@@ -63,6 +66,11 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             >
               Logout
             </button>
+
+            {/* Rodapé com a versão */}
+            <div className="mt-auto py-2 px-4 text-xs text-gray-400 text-center sticky bottom-0">
+              Versão {appVersion}
+            </div>
           </nav>
         </div>
       )}

@@ -17,7 +17,7 @@ const MessageModal: React.FC<MessageModalProps> = ({ isOpen, message, onClose })
   // Função para fechar o modal e redirecionar para a página de parcelas
   const handleClose = () => {
     onClose();  // Chama a função de fechamento fornecida por props
-    navigate('/parcelas');  // Redireciona para a página de listagem de parcelas
+    navigate('/');  // Redireciona para a página de listagem de parcelas
   };
 
   return (

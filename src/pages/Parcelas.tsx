@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
+import { useParcelas } from "../ParcelaContext";
 import { Link } from "react-router-dom";
-import { getParcelasData } from "../api";
-import positivo from "../assets/positivo.gif";
-import carregando from "../assets/carregando.gif";
-import { formatarValor, formatarData } from "../utils"; // Importando as funções de formatação
 import Loading from "../components/Loading";
+import positivo from "../assets/positivo.gif";
+import { formatarValor, formatarData } from "../utils"; // Certifique-se de que estas funções estejam implementadas
 
 interface Cliente {
   clienteId: number;
@@ -37,31 +36,12 @@ interface Parcela {
 }
 
 const Parcelas: React.FC = () => {
-  const [parcelas, setParcelas] = useState<Parcela[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const { parcelas, loading, error, fetchParcelas } = useParcelas(); // Usando o Contexto
   const [filter, setFilter] = useState<string>("todas");
 
   useEffect(() => {
-    const fetchParcelas = async () => {
-      try {
-        const response = await getParcelasData();
-        if (Array.isArray(response)) {
-          setParcelas(response);
-        } else {
-          console.error("Resposta do servidor não é um array:");
-          setParcelas([]); // Define um array vazio em caso de erro
-        }
-      } catch (err) {
-        console.error("Erro ao buscar parcelas:", err);
-        setError("Erro ao buscar parcelas");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchParcelas();
-  }, []);
+    fetchParcelas(); // Busca as parcelas ao montar o componente
+  }, [fetchParcelas]);
 
   // Obter data atual e zerar horas
   const dataAtual = new Date();
@@ -115,11 +95,11 @@ const Parcelas: React.FC = () => {
         new Date(b.dataVencimento).getTime()
     );
 
+    console.log("Parcelas component is rendering");
   return (
     <div>
       {/* Componente de loading */}
       <Loading loading={loading} error={error} />
-
       {/* Cabeçalho fixo */}
       <div className="sticky top-0 bg-white p-4" style={{ marginTop: 0 }}>
         <div className="flex flex-col md:flex-row md:items-start md:justify-start">

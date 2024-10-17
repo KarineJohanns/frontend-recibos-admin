@@ -2,11 +2,14 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../api'; // Importando a função de login do Axios
 import { formatarCPF } from '../utils';
+import showIcon from '../assets/show.png'; // Importando o ícone para mostrar a senha
+import hideIcon from '../assets/hide.png'; // Importando o ícone para ocultar a senha
 
 const Login = () => {
   const [cpf, setCpf] = useState('');
   const [senha, setSenha] = useState('');
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false); // Novo estado para controlar a visibilidade da senha
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -22,7 +25,7 @@ const Login = () => {
       if (response.primeiroAcesso) {
         navigate('/alterar-senha'); // Redireciona para a tela de alteração de senha
       } else {
-        navigate('/parcelas'); // Redireciona para a página principal
+        navigate('/'); // Redireciona para a página principal
       }
 
       // Lógica para expiração do token (opcional)
@@ -59,15 +62,28 @@ const Login = () => {
             autoComplete="username" // Sugestão de preenchimento automático para CPF
             required
           />
-          <input
-            type="password"
-            placeholder="Senha"
-            value={senha}
-            onChange={(e) => setSenha(e.target.value)}
-            className="block w-full mb-4 p-2 border rounded"
-            autoComplete="current-password" // Sugestão de preenchimento automático para senha
-            required
-          />
+          <div className="relative mb-4">
+            <input
+              type={showPassword ? 'text' : 'password'} // Altera entre 'text' e 'password'
+              placeholder="Senha"
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+              className="block w-full p-2 border rounded"
+              autoComplete="current-password" // Sugestão de preenchimento automático para senha
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)} // Alterna a visibilidade da senha
+              className="absolute inset-y-0 right-0 flex items-center pr-3"
+            >
+              <img 
+                src={showPassword ? hideIcon : showIcon} // Troca entre os ícones de mostrar/ocultar a senha
+                alt={showPassword ? 'Ocultar senha' : 'Mostrar senha'} // Texto alternativo para acessibilidade
+                className="h-5 w-5" // Define a altura e largura do ícone
+              />
+            </button>
+          </div>
           {error && <p className="text-red-500 mb-4">{error}</p>}
           <button
             type="submit"

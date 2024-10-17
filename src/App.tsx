@@ -1,6 +1,5 @@
-// src/App.tsx
-import React from "react";
-import { Routes, Route } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import Layout from "./components/Layout";
 import Parcelas from "./pages/Parcelas";
 import Relatorios from "./pages/Relatorios";
@@ -10,33 +9,36 @@ import ParcelaDetails from "./pages/ParcelaDetails";
 import CriarParcela from "./pages/CriarParcela";
 import EditarParcela from "./pages/EditarParcela";
 import RenegociarParcela from "./pages/RenegociarParcela";
+import { ParcelaProvider } from "./ParcelaContext"; // Importando o ParcelaProvider
 
 const App: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    // Verifica se o usuário está autenticado
+    const userSession = localStorage.getItem("userSession");
+
+    // Redireciona para o login se não houver sessão ativa e a rota não for uma das permitidas
+    if (!userSession && location.pathname !== "/login") {
+      navigate("/login");
+    }
+  }, [navigate, location.pathname]);
+
+
   return (
-    <Layout>
+    <ParcelaProvider>
       <Routes>
         <Route path="/login" element={<Login />} />
+        
+        {/* Rotas protegidas com PrivateRoute */}
         <Route
           path="/"
           element={
             <PrivateRoute>
-              <Parcelas />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/parcelas/:id"
-          element={
-            <PrivateRoute>
-              <ParcelaDetails />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/relatorios"
-          element={
-            <PrivateRoute>
-              <Relatorios />
+              <Layout>
+                <Parcelas />
+              </Layout>
             </PrivateRoute>
           }
         />
@@ -44,7 +46,29 @@ const App: React.FC = () => {
           path="/parcelas"
           element={
             <PrivateRoute>
-              <Parcelas />
+              <Layout>
+                <Parcelas />
+              </Layout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/parcelas/:id"
+          element={
+            <PrivateRoute>
+              <Layout>
+                <ParcelaDetails />
+              </Layout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/relatorios"
+          element={
+            <PrivateRoute>
+              <Layout>
+                <Relatorios />
+              </Layout>
             </PrivateRoute>
           }
         />
@@ -52,7 +76,9 @@ const App: React.FC = () => {
           path="/criar-parcela"
           element={
             <PrivateRoute>
-              <CriarParcela />
+              <Layout>
+                <CriarParcela />
+              </Layout>
             </PrivateRoute>
           }
         />
@@ -60,7 +86,9 @@ const App: React.FC = () => {
           path="/editar-parcela/:parcelaId"
           element={
             <PrivateRoute>
-              <EditarParcela />
+              <Layout>
+                <EditarParcela />
+              </Layout>
             </PrivateRoute>
           }
         />
@@ -68,12 +96,14 @@ const App: React.FC = () => {
           path="/renegociar-parcela/:parcelaId"
           element={
             <PrivateRoute>
-              <RenegociarParcela />
+              <Layout>
+                <RenegociarParcela />
+              </Layout>
             </PrivateRoute>
           }
         />
       </Routes>
-    </Layout>
+    </ParcelaProvider>
   );
 };
 

@@ -2,7 +2,8 @@ import axios, { AxiosRequestConfig } from 'axios';
 
 // Configuração da instância do Axios
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: 'http://144.22.133.136/api',
+  //baseURL: 'http://localhost:8080/api',
   headers: {
     'Content-Type': 'application/json',
   },
