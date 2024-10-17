@@ -1,9 +1,9 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-// Defina a base dinamicamente de acordo com a variável de ambiente
-const basePath = process.env.REACT_APP_BASE_PATH || '/admin/';
 
+//utilizar base: '', para admin.karine.pt
+//utilizar base: '/admin/', para 144.22.133.136/admin
 export default defineConfig({
   plugins: [react()],
   css: {
@@ -13,5 +13,9 @@ export default defineConfig({
     port: 5173, // Defina a porta desejada aqui
     host: true,
   },
-  base: basePath
+  base: '',
+  build: {
+    outDir:'dist',
+    emptyOutDir: true,
+  }
 });

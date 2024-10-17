@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import packageJson from '../../package.json'
 
 // Importe a versão diretamente do package.json ou use a variável de ambiente
-const appVersion = process.env.REACT_APP_VERSION;
-
+const appVersion = packageJson.version;
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false); // Estado para controlar a abertura do menu
   const location = useLocation(); // Obtém a localização atual da aplicação

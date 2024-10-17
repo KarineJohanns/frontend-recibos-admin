@@ -95,7 +95,6 @@ const Parcelas: React.FC = () => {
         new Date(b.dataVencimento).getTime()
     );
 
-    console.log("Parcelas component is rendering");
   return (
     <div>
       {/* Componente de loading */}
